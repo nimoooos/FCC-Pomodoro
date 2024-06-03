@@ -83,11 +83,18 @@ $("#start_stop").on("click", function () {
 
 $("#reset").on("click", function () {
     console.log("reset was pressed.");
+    $("#beep").pause();
+    $("#beep").load();
+
     sessionLength = 25;
+    $("#session-length").text(sessionLength);
+
     breakLength = 5;
-    timeLeft = sessionLength * 60;
+    $("#break-length").text(breakLength);
+
     timerState = TimerStates.STOPPED;
     sessionState = SessionStates.SESSION;
+    timeLeft = sessionLength * 60;
     update_timer();
 })
 
@@ -96,20 +103,28 @@ setInterval(function () {
         timeLeft -= 1;
         update_timer();
     }
-}, 1000)
+}, 10) //TODO: change back to 1000
 
 function update_timer() {
     if (timeLeft >= 0) {
         $("#time-left").text(formatTime(timeLeft));
     } else {  // if timer reaches 0
+        $("#beep").play();
         if (sessionState==SessionStates.SESSION) {
             sessionState=SessionStates.BREAK;
             timeLeft=breakLength*60;
+            $("#time-left").text(formatTime(timeLeft));
+            $("#timer-label").text("Break");
+
         } else if (sessionState==SessionStates.BREAK) {
             sessionState=SessionStates.SESSION;
             timeLeft=sessionLength*60;
+            $("#time-left").text(formatTime(timeLeft));
+            $("#timer-label").text("Session");
+
         }
     }
+    console.log(formatTime(timeLeft));
 
     function formatTime(seconds) {
         let minute = Math.floor(seconds / 60);
