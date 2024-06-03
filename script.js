@@ -15,6 +15,15 @@ let sessionState = SessionStates.SESSION;
 let timerState = TimerStates.STOPPED;
 
 let timeLeft = 25 * 60;
+let beep = document.getElementById("beep");
+
+function sessionToggle() {
+    if (sessionState==SessionStates.SESSION) {
+        sessionState=SessionStates.BREAK;
+    } else {
+        sessionState=SessionStates.SESSION;
+    }
+}
 
 $("#session-decrement").on("click", function () {
     console.log("session-decrement was pressed.");
@@ -83,8 +92,8 @@ $("#start_stop").on("click", function () {
 
 $("#reset").on("click", function () {
     console.log("reset was pressed.");
-    $("#beep").pause();
-    $("#beep").load();
+    beep.pause();
+    beep.load();
 
     sessionLength = 25;
     $("#session-length").text(sessionLength);
@@ -94,6 +103,8 @@ $("#reset").on("click", function () {
 
     timerState = TimerStates.STOPPED;
     sessionState = SessionStates.SESSION;
+    $("#timer-label").text("Session");
+
     timeLeft = sessionLength * 60;
     update_timer();
 })
@@ -103,21 +114,22 @@ setInterval(function () {
         timeLeft -= 1;
         update_timer();
     }
-}, 10) //TODO: change back to 1000
+}, 1000) //TODO: change back to 1000
 
 function update_timer() {
-    if (timeLeft >= 0) {
-        $("#time-left").text(formatTime(timeLeft));
-    } else {  // if timer reaches 0
-        $("#beep").play();
-        if (sessionState==SessionStates.SESSION) {
-            sessionState=SessionStates.BREAK;
+    $("#time-left").text(formatTime(timeLeft));
+
+    if (timeLeft > 0) {} 
+    if (timeLeft<=0) {
+        beep.play();
+        sessionToggle()
+
+        if (sessionState==SessionStates.BREAK) {
             timeLeft=breakLength*60;
             $("#time-left").text(formatTime(timeLeft));
             $("#timer-label").text("Break");
 
-        } else if (sessionState==SessionStates.BREAK) {
-            sessionState=SessionStates.SESSION;
+        } else if (sessionState==SessionStates.SESSION) {
             timeLeft=sessionLength*60;
             $("#time-left").text(formatTime(timeLeft));
             $("#timer-label").text("Session");
@@ -130,6 +142,8 @@ function update_timer() {
         let minute = Math.floor(seconds / 60);
         let second = seconds % 60;
         if (second < 10) { second = "0" + second }
+        if (minute < 10) { minute = "0" + minute }
+        
         return `${minute}:${second}`
     }
 }
